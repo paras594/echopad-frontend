@@ -5,7 +5,7 @@ import React, { Suspense, useEffect, useState } from "react";
 // import ReactQuill from "react-quill";
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
-import io from "Socket.IO-client";
+import io from "socket.io-client";
 let socket: any;
 
 type Props = {
