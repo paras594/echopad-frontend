@@ -31,6 +31,11 @@ const TextEditor = ({ session, email }: Props) => {
 
     socket.on("user-joined-room", (data: any) => {
       setRoomCount(data.roomCount);
+      socket.emit("input-change", {
+        text: input,
+        email,
+        senderid: socket.id,
+      });
     });
 
     socket.on("user-left-room", (data: any) => {
