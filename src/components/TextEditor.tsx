@@ -59,13 +59,15 @@ const TextEditor = ({ session, email }: Props) => {
     editor: any
   ) => {
     console.log({ content, delta, source, editor });
-    setInput(editor.getContents());
-    if (!socket) return;
-    socket.emit("input-change", {
-      text: editor.getContents(),
-      email,
-      senderid: socket.id,
-    });
+
+    if (!socket) setInput(editor.getContents());
+    else {
+      socket.emit("input-change", {
+        text: editor.getContents(),
+        email,
+        senderid: socket.id,
+      });
+    }
   };
 
   return (
