@@ -23,7 +23,7 @@ const Navbar = async () => {
       </div>
       <div className="flex-none gap-2 mr-4">
         {jwt ? (
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-2 md:gap-4 items-center">
             <ConnectedDevicesCount />
             <ProfileDropdown name={name} />
           </div>

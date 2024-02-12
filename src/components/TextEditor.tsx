@@ -31,6 +31,7 @@ const TextEditor = ({ session, email }: Props) => {
 
     socket.on("user-joined-room", (data: any) => {
       setRoomCount(data.roomCount);
+      if (!input) return;
       socket.emit("input-change", {
         text: input,
         email,
