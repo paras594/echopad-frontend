@@ -39,7 +39,6 @@ const TextEditor = ({ session, email }: Props) => {
 
     socket.on("input-change", (data: any) => {
       console.log("updating here state", data, socket.id);
-      if (data.senderid === socket.id) return;
       setInput(data.text);
     });
   };
@@ -52,22 +51,16 @@ const TextEditor = ({ session, email }: Props) => {
     };
   }, [session, isLoggedIn]);
 
-  const onChangeHandler = (
-    content: any,
-    delta: any,
-    source: any,
-    editor: any
-  ) => {
-    console.log({ content, delta, source, editor });
-
-    if (!socket) setInput(editor.getContents());
-    else {
-      socket.emit("input-change", {
-        text: editor.getContents(),
-        email,
-        senderid: socket.id,
-      });
-    }
+  const onChangeHandler = (e: any) => {
+    // console.log({ content, delta, source, editor });
+    const value = e.target.innerHTML;
+    // setInput(value);
+    if (!socket) return;
+    socket.emit("input-change", {
+      text: value,
+      email,
+      senderid: socket.id,
+    });
   };
 
   return (
@@ -76,7 +69,7 @@ const TextEditor = ({ session, email }: Props) => {
         style={{ minHeight: "100%" }}
         theme="snow"
         value={input}
-        onChange={onChangeHandler}
+        onKeyUp={onChangeHandler}
         modules={{
           toolbar: [
             [{ header: [1, 2, 3, 4, false] }],
