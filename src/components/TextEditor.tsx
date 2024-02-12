@@ -38,13 +38,8 @@ const TextEditor = ({ session, email }: Props) => {
     });
 
     socket.on("input-change", (data: any) => {
+      console.log("updating here state", data, socket.id);
       if (data.senderid === socket.id) return;
-      console.log(
-        "updating here state",
-        data,
-        socket.id,
-        socket.handshake.query.id
-      );
       setInput(data.text);
     });
   };
