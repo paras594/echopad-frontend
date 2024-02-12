@@ -38,13 +38,11 @@ const TextEditor = ({ session, email }: Props) => {
     });
 
     socket.on("input-change", (data: any) => {
-      console.log("changes here", data);
       setInput(data.text);
     });
   };
 
   useEffect(() => {
-    console.log({ session, isLoggedIn });
     if (isLoggedIn) socketInitializer();
 
     return () => {
