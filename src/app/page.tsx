@@ -1,41 +1,34 @@
-import ClientSideState from "@/components/ClientSideState";
-import TextEditor from "@/components/TextEditor";
-import useStore from "@/lib/useStore";
-import { cookies } from "next/headers";
+import dynamic from "next/dynamic";
+const TextEditor2 = dynamic(() => import("@/components/TextEditor2"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-1/2 flex items-center justify-center">
+      <span className="loading loading-spinner scale-150 text-primary"></span>
+    </div>
+  ),
+});
+import { getServerAuthSession } from "@/lib/authOptions";
 import { Suspense } from "react";
 
-export default function Home() {
-  const cookieStore = cookies();
-  const jwt = cookieStore.get("jwt")?.value;
-  const email = cookieStore.get("email")?.value;
-  const name = cookieStore.get("name")?.value;
+export default async function Home() {
+  const authSession = await getServerAuthSession();
 
-  // const setIsLoggedIn = useStore((state: any) => state.setIsLoggedIn);
-  // const setUser = useStore((state: any) => state.setUser);
+  console.log({ authSession });
+  /*
+  authSession = {
+    "name":"Paras Arora",
+    "email":"parasarora594@gmail.com",
+    "id":"parasarora594@gmail.com",
+    "access_token": "jwt token"
+  }
 
-  // if (jwt) {
-  //   console.log("setting state");
-  //   useStore.setState({
-  //     isLoggedIn: true,
-  //     name: name,
-  //     email: email,
-  //   });
-  // }
+  */
 
   return (
-    <>
-      <ClientSideState
-        state={{
-          isLoggedIn: jwt ? true : false,
-          name: name,
-          email: email,
-        }}
-      />
-      <section className="min-h-full grid relative">
-        <div className="grid overflow-y-scroll">
-          <TextEditor session={jwt} email={email} />
-        </div>
-      </section>
-    </>
+    <section className="grid relative" style={{ height: "calc(100vh - 72px)" }}>
+      <div className="grid overflow-y-scroll">
+        <TextEditor2 />
+      </div>
+    </section>
   );
 }

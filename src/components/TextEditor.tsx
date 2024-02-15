@@ -1,37 +1,33 @@
 "use client";
+
 import useStore from "@/lib/useStore";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import React, { Suspense, useEffect, useState } from "react";
-// import ReactQuill from "react-quill";
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
+import ReactQuill from "react-quill";
 import io from "socket.io-client";
+import CustomToolbar from "@/components/CustomToolbar";
+
 let socket: any;
 
-type Props = {
-  session?: string;
-  email?: string;
-  // text: string;
-  // onChange: (text: string) => void;
-};
-
-const TextEditor = ({ session, email }: Props) => {
+const TextEditor = () => {
   const [input, setInput] = useState("");
+  const { data: session } = useSession();
   const setRoomCount = useStore((state: any) => state.setRoomCount);
-  const isLoggedIn = useStore((state: any) => state.isLoggedIn);
-  console.log({ isLoggedIn });
 
   const socketInitializer = async () => {
     if (!process.env.NEXT_PUBLIC_SOCKET_V1_URL) return;
-    socket = io(process.env.NEXT_PUBLIC_SOCKET_V1_URL, {
-      email,
-    } as any);
+    const email = session?.user?.email;
+    socket = io(process.env.NEXT_PUBLIC_SOCKET_V1_URL, { email } as any);
 
     socket?.emit("register-user", { email });
 
     socket.on("user-joined-room", (data: any) => {
       setRoomCount(data.roomCount);
+
       if (!input) return;
+
       socket.emit("input-change", {
         text: input,
         email,
@@ -44,47 +40,72 @@ const TextEditor = ({ session, email }: Props) => {
     });
 
     socket.on("input-change", (data: any) => {
-      console.log("updating here state", data, socket.id);
       setInput(data.text);
     });
   };
 
   useEffect(() => {
-    if (isLoggedIn) socketInitializer();
+    if (session) socketInitializer();
 
     return () => {
       socket?.close();
     };
-  }, [session, isLoggedIn]);
+  }, [session]);
 
   const onChangeHandler = (e: any) => {
-    // console.log({ content, delta, source, editor });
     const value = e.target.innerHTML;
-    // setInput(value);
+
     if (!socket) return;
     socket.emit("input-change", {
       text: value,
-      email,
+      email: session?.user?.email,
       senderid: socket.id,
     });
   };
 
+  function insertLink() {
+    const cursorPosition = this.quill.getSelection()?.index;
+    if (!cursorPosition) return;
+    this.quill.insertText(cursorPosition, "★");
+    this.quill.setSelection(cursorPosition + 1);
+  }
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <div
+      className="text-editor"
+      style={{
+        minHeight: "100%",
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+      }}
+    >
+      <CustomToolbar />
       <ReactQuill
-        style={{ minHeight: "100%" }}
         theme="snow"
         value={input}
         onKeyUp={onChangeHandler}
         modules={{
-          toolbar: [
-            [{ header: [1, 2, 3, 4, false] }],
-            ["bold", "italic", "underline"],
-            ["code-block"],
-          ],
+          toolbar: {
+            container: "#toolbar",
+            handlers: {
+              insertLink: insertLink,
+            },
+          },
+          clipboard: {
+            matchVisual: false,
+          },
         }}
+        placeholder="Write something..."
+        // modules={{
+        //   toolbar: [
+        //     [{ header: [1, 2, 3, false] }],
+        //     ["bold", "italic", "underline"],
+        //     [{ list: "ordered" }],
+        //     ["link", "code-block"],
+        //   ],
+        // }}
       />
-    </Suspense>
+    </div>
   );
 };
 

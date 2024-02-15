@@ -9,6 +9,57 @@
   z-index: 1;
 }
 
+.ql-container {
+  display: grid;
+}
+
 .ql-editor {
   font-size: 16px;
+}
+
+.tiptap .is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-content {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer base {
+  h1 {
+    @apply prose-2xl font-semibold;
+  }
+
+  h2 {
+    @apply prose-xl font-semibold;
+  }
+
+  h3 {
+    @apply prose-lg font-semibold;
+  }
+
+  a {
+    @apply text-blue-500 underline;
+  }
+
+  ol {
+    @apply list-decimal list-inside ml-2;
+  }
+
+  ol > li > p {
+    @apply inline;
+  }
+
+  pre {
+    @apply bg-slate-100 px-4 py-2 rounded-lg my-2;
+  }
 }

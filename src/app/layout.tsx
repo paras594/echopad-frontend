@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="cupcake">
       <body
-        className={`${inter.className} min-h-screen overflow-hidden grid`}
-        style={{ gridTemplateRows: "auto 1fr" }}
+        className={`${inter.className} min-h-screen overflow-hidden flex flex-col`}
       >
-        <Navbar />
-        {children}
+        <AuthProvider>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );

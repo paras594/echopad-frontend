@@ -8,10 +8,10 @@ const ConnectedDevicesCount = () => {
   const roomCount = useStore((state: any) => state.roomCount);
   return (
     <div className="flex items-center gap-2">
-      <span className="text-3xl text-white">
+      <span className="text-2xl md:text-3xl text-primary">
         <PiDevices />
       </span>
-      <span className="kbd">{roomCount}</span>
+      <span className="kbd scale-90">{roomCount}</span>
     </div>
   );
 };

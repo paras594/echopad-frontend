@@ -1,31 +1,29 @@
 import ProfileDropdown from "@/components/ProfileDropdown";
 import Link from "next/link";
-import { cookies } from "next/headers";
 import ConnectedDevicesCount from "@/components/ConnectedDevicesCount";
+import { getServerAuthSession } from "@/lib/authOptions";
+import Image from "next/image";
 
 const loggedIn = false;
 
 const Navbar = async () => {
-  const cookieStore = cookies();
-  const name = cookieStore.get("name")?.value;
-  const email = cookieStore.get("email")?.value;
-  const jwt = cookieStore.get("jwt")?.value;
-
-  console.log({ name, email, jwt });
+  const authSession = await getServerAuthSession();
 
   return (
-    <div className="navbar bg-primary">
-      <div className="flex-1">
-        <Link href="/" className="btn gap-0 btn-ghost text-xl text-white">
-          <span className="text-accent">Echo</span>
-          <span className="text-accent"></span>Pad
+    <div className="navbar border-b">
+      <div className="flex-1 ml-2 md:ml-4">
+        <Link
+          href="/"
+          className="gap-0 relative block w-[72px] h-10 md:w-20 md:h-12"
+        >
+          <Image src="/echopad-logo.svg" alt="echopad" fill />
         </Link>
       </div>
-      <div className="flex-none gap-2 mr-4">
-        {jwt ? (
-          <div className="flex gap-2 md:gap-4 items-center">
+      <div className="flex-none gap-2 mr-2 md:mr-4">
+        {authSession?.user ? (
+          <div className="flex gap-4 md:gap-6 items-center">
             <ConnectedDevicesCount />
-            <ProfileDropdown name={name} />
+            <ProfileDropdown name={authSession?.user?.name} />
           </div>
         ) : (
           <Link href="/login" className="btn">

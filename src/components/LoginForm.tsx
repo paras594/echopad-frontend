@@ -1,25 +1,35 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
-import { useFormState } from "react-dom";
+import React, { useState } from "react";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import InputErrorLabel from "@/components/InputErrorLabel";
-import { loginUser } from "@/actions/login-user";
+import { signIn } from "next-auth/react";
 
 const LoginForm = () => {
-  const [state, formAction] = useFormState<any>(loginUser, {});
-  const router = useRouter();
+  const [state, setState] = useState({
+    email: "",
+    password: "",
+    errors: {} as any,
+  });
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/");
-    }
-  }, [state?.success, router]);
+  const handleChange = (event: any) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setState((values) => ({ ...values, [name]: value }));
+  };
+
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+    await signIn("credentials", {
+      email: state.email,
+      password: state.password,
+      callbackUrl: "/",
+    });
+  };
 
   return (
     <form
-      action={formAction}
+      onSubmit={handleSubmit}
       className="flex flex-col gap-4 w-full max-w-sm mx-auto"
     >
       <div>
@@ -27,6 +37,8 @@ const LoginForm = () => {
           type="text"
           name="email"
           placeholder="Email"
+          onChange={handleChange}
+          value={state.email}
           className="input input-bordered w-full"
         />
         {state?.errors?.email && (
@@ -38,6 +50,8 @@ const LoginForm = () => {
           type="password"
           name="password"
           placeholder="Password"
+          onChange={handleChange}
+          value={state.password}
           className="input input-bordered w-full"
         />
         {state?.errors?.password && (

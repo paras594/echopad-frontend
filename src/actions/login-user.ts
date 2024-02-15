@@ -2,6 +2,7 @@
 import cookieParser from "set-cookie-parser";
 import { cookies } from "next/headers";
 
+// loginUser: archived
 export const loginUser: any = async (currentState: any, formData: any) => {
   "use server";
 
