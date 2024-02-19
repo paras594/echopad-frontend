@@ -4,8 +4,11 @@ import React, { useState } from "react";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import InputErrorLabel from "@/components/InputErrorLabel";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 const LoginForm = () => {
+  const router = useRouter();
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -20,15 +23,30 @@ const LoginForm = () => {
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
-    await signIn("credentials", {
-      email: state.email,
-      password: state.password,
-      callbackUrl: "/",
-    });
+    try {
+      const result = await signIn("credentials", {
+        email: state.email,
+        password: state.password,
+        callbackUrl: "/",
+        redirect: false,
+      });
+
+      console.log({ result });
+
+      if (result?.error) {
+        const error = JSON.parse(result?.error);
+        setState((values) => ({ ...values, errors: error.errors }));
+      } else {
+        window.location.href = result?.url || "/";
+      }
+    } catch (error) {
+      console.log({ error });
+    }
   };
 
   return (
     <form
+      method="POST"
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 w-full max-w-sm mx-auto"
     >

@@ -90,7 +90,9 @@ const TextEditor2 = () => {
 
   return (
     <div>
-      <Toolbar editor={editor} />
+      <div className="sticky top-0 bg-white z-[10]">
+        <Toolbar editor={editor} />
+      </div>
       <EditorContent
         editor={editor}
         className="min-h-full grid [&>div]:outline-none px-3 py-2"

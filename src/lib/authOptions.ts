@@ -1,6 +1,26 @@
 import { NextAuthOptions, getServerSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+class CustomError extends Error {
+  errors: Record<any, any>;
+  constructor({ message, errors }: { message: string; errors: any }) {
+    super(message);
+    Object.setPrototypeOf(this, CustomError.prototype);
+    this.errors = errors;
+  }
+}
+
+const errorCallback = async (
+  error: any,
+  _req: any,
+  _res: any,
+  _configuration: any
+) => {
+  // Perform custom error handling logic here
+  // For example, log the error or display it on the login page
+  throw new Error(error.message);
+};
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt", //(1)
@@ -58,10 +78,10 @@ export const authOptions: NextAuthOptions = {
 
         const data = await res.json();
 
-        console.log({ data });
+        console.log({ data, resOk: res.ok });
 
         if (!res.ok) {
-          return { errors: { error: data.message } };
+          throw new Error(JSON.stringify(data));
         }
 
         return {

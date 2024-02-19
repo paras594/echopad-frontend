@@ -17,7 +17,9 @@ const ProfileDropdown = ({ name }: any) => {
       <button tabIndex={0} role="button" className="flex gap-2 items-center">
         <div className="avatar placeholder">
           <div className="bg-primary text-white border-2 border-accent w-9 md:w-10 rounded-full">
-            <span className="text-lg md:text-xl">{name[0] || "?"}</span>
+            <span className="text-lg md:text-xl capitalize">
+              {name?.[0] || "?"}
+            </span>
           </div>
         </div>
         <span className="prose text-primary hidden md:inline font-semibold">
