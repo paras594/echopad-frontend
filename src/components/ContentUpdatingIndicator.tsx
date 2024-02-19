@@ -1,26 +1,28 @@
 "use client";
 
 import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AiOutlineSync } from "react-icons/ai";
 import { BsCloudCheck } from "react-icons/bs";
 
 const ContentUpdatingIndicator = () => {
   const { isUpdating } = useUpdatingContentStore((state: any) => state);
   const [hide, setHide] = useState(false);
+  const timeoutRef = useRef<any>(null);
 
   useEffect(() => {
+    if (isUpdating) setHide(false);
     if (!isUpdating) {
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setHide(true);
       }, 2000);
     }
 
-    if (isUpdating) {
-      setTimeout(() => {
-        setHide(false);
-      }, 0);
-    }
+    () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [isUpdating]);
 
   return (
