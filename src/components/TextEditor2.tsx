@@ -130,6 +130,7 @@ const TextEditor2 = () => {
   };
 
   const fetchUserContent = async () => {
+    setIsUpdating(true);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content`,
@@ -145,8 +146,6 @@ const TextEditor2 = () => {
 
       const data = await res.json();
 
-      console.log("HERE IS DATA", data);
-
       if (!res.ok) {
         console.log({
           errorOccured: data,
@@ -156,6 +155,8 @@ const TextEditor2 = () => {
       }
     } catch (error) {
       console.log({ error });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
