@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Sharing content across multiple devices with ease.",
   generator: "Next.js",
   manifest: "/manifest.json",
-  keywords: ["echopad", "sync", "text sync"],
+  keywords: ["echopad", "sync", "text sync", "share text"],
   themeColor: [{ media: "(prefers-color-scheme: light)", color: "#231942" }],
   authors: [{ name: "Paras Arora" }],
   viewport:
