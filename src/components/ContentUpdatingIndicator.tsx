@@ -11,6 +11,7 @@ const ContentUpdatingIndicator = () => {
   const timeoutRef = useRef<any>(null);
 
   useEffect(() => {
+    clearTimeout(timeoutRef.current);
     if (isUpdating) setHide(false);
     if (!isUpdating) {
       timeoutRef.current = setTimeout(() => {
