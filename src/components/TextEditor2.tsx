@@ -4,18 +4,62 @@ import useStore from "@/lib/useStore";
 import { useEditor, EditorContent, markPasteRule } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import io from "socket.io-client";
 import Toolbar from "@/components/Toolbar";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import debounce from "lodash.debounce";
+import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
 
 let socket: any;
 
-const TextEditor2 = () => {
+const TextEditor2 = ({ content }: { content: any }) => {
   const { data: session } = useSession();
   const setRoomCount = useStore((state: any) => state.setRoomCount);
+  const { setIsUpdating } = useUpdatingContentStore((state: any) => state);
+
+  console.log({ session });
+
+  const updateContent = async (content: any) => {
+    // @ts-ignore
+    if (!session?.user?.access_token) return;
+    setIsUpdating(true);
+    console.log({ session });
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // @ts-ignore
+            authorization: `Bearer ${session?.user?.access_token}`,
+          },
+          body: JSON.stringify({
+            content,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.log({
+          errorOccured: data,
+        });
+      }
+    } catch (error) {
+      console.log({ error });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const debouncedUpdateContent = useCallback(debounce(updateContent, 1500), [
+    // @ts-ignore
+    session?.user?.access_token,
+  ]);
 
   const editor = useEditor({
     extensions: [
@@ -39,6 +83,11 @@ const TextEditor2 = () => {
     ],
     autofocus: true,
     editable: true,
+    onCreate: ({ editor }) => {
+      if (content) {
+        editor.commands.setContent(content, false);
+      }
+    },
     onUpdate: ({ editor }) => {
       if (!session) return;
       // if (editorIsEmpty) return;
@@ -47,6 +96,8 @@ const TextEditor2 = () => {
         email: session?.user?.email,
         senderid: socket.id,
       });
+
+      debouncedUpdateContent(editor?.getHTML());
     },
   });
 
@@ -64,11 +115,11 @@ const TextEditor2 = () => {
 
       if (editorIsEmpty) return;
 
-      socket.emit("input-change", {
-        text: editor?.getHTML(),
-        email,
-        senderid: socket.id,
-      });
+      // socket.emit("input-change", {
+      //   text: editor?.getHTML(),
+      //   email,
+      //   senderid: socket.id,
+      // });
     });
 
     socket.on("user-left-room", (data: any) => {

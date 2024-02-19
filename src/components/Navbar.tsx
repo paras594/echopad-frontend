@@ -3,6 +3,8 @@ import Link from "next/link";
 import ConnectedDevicesCount from "@/components/ConnectedDevicesCount";
 import { getServerAuthSession } from "@/lib/authOptions";
 import Image from "next/image";
+import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
+import ContentUpdatingIndicator from "./ContentUpdatingIndicator";
 
 const loggedIn = false;
 
@@ -22,6 +24,7 @@ const Navbar = async () => {
       <div className="flex-none gap-2 mr-2 md:mr-4">
         {authSession?.user ? (
           <div className="flex gap-4 md:gap-6 items-center">
+            <ContentUpdatingIndicator />
             <ConnectedDevicesCount />
             <ProfileDropdown name={authSession?.user?.name} />
           </div>

@@ -10,17 +10,6 @@ class CustomError extends Error {
   }
 }
 
-const errorCallback = async (
-  error: any,
-  _req: any,
-  _res: any,
-  _configuration: any
-) => {
-  // Perform custom error handling logic here
-  // For example, log the error or display it on the login page
-  throw new Error(error.message);
-};
-
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt", //(1)
