@@ -138,12 +138,14 @@ const TextEditor2 = () => {
           headers: {
             "Content-Type": "application/json",
             // @ts-ignore
-            authorization: `Bearer ${authSession?.user?.access_token}`,
+            authorization: `Bearer ${session?.user?.access_token}`,
           },
         }
       );
 
       const data = await res.json();
+
+      console.log("HERE IS DATA", data);
 
       if (!res.ok) {
         console.log({
