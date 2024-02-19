@@ -15,7 +15,7 @@ import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
 
 let socket: any;
 
-const TextEditor2 = ({ content }: { content: any }) => {
+const TextEditor2 = () => {
   const { data: session } = useSession();
   const setRoomCount = useStore((state: any) => state.setRoomCount);
   const { setIsUpdating } = useUpdatingContentStore((state: any) => state);
@@ -83,11 +83,9 @@ const TextEditor2 = ({ content }: { content: any }) => {
     ],
     autofocus: true,
     editable: true,
-    onCreate: ({ editor }) => {
-      if (content) {
-        editor.commands.setContent(content, false);
-      }
-    },
+    // onCreate: ({ editor }) => {
+
+    // },
     onUpdate: ({ editor }) => {
       if (!session) return;
       // if (editorIsEmpty) return;
@@ -131,8 +129,39 @@ const TextEditor2 = ({ content }: { content: any }) => {
     });
   };
 
+  const fetchUserContent = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            // @ts-ignore
+            authorization: `Bearer ${authSession?.user?.access_token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log({
+          errorOccured: data,
+        });
+      } else {
+        editor?.commands?.setContent(data.userContent.content);
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
   useEffect(() => {
-    if (session) socketInitializer();
+    if (session) {
+      socketInitializer();
+      fetchUserContent();
+    }
 
     return () => {
       socket?.close();

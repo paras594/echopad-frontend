@@ -13,31 +13,14 @@ import { Suspense } from "react";
 export default async function Home() {
   const authSession = await getServerAuthSession();
 
-  let content = "";
-
-  if (authSession) {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // @ts-ignore
-          authorization: `Bearer ${authSession?.user?.access_token}`,
-        },
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.log({
-        errorOccured: data,
-      });
-    }
-    console.log({ data });
-    content = data.userContent.content;
-  }
+  //   if (!res.ok) {
+  //     console.log({
+  //       errorOccured: data,
+  //     });
+  //   }
+  //   console.log({ data });
+  //   content = data.userContent.content;
+  // }
 
   // console.log({ authSession });
   /*
@@ -53,7 +36,7 @@ export default async function Home() {
   return (
     <section className="grid relative" style={{ height: "calc(100vh - 72px)" }}>
       <div className="grid overflow-y-scroll">
-        <TextEditor2 content={content} />
+        <TextEditor2 />
       </div>
     </section>
   );
