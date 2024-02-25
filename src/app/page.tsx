@@ -8,7 +8,8 @@ const TextEditor2 = dynamic(() => import("@/components/TextEditor2"), {
   ),
 });
 import { getServerAuthSession } from "@/lib/authOptions";
-import { Suspense } from "react";
+import Link from "next/link";
+import { PiFiles } from "react-icons/pi";
 
 export default async function Home() {
   const authSession = await getServerAuthSession();
@@ -37,6 +38,14 @@ export default async function Home() {
     <section className="grid relative" style={{ height: "calc(100vh - 72px)" }}>
       <div className="grid overflow-y-scroll">
         <TextEditor2 />
+      </div>
+      <div className="fixed bottom-4 right-4">
+        <Link
+          href="/files"
+          className="btn btn-circle btn-lg btn-primary text-2xl"
+        >
+          <PiFiles />
+        </Link>
       </div>
     </section>
   );

@@ -1,35 +1,21 @@
 "use client";
-
 import ProfileDropdown from "@/components/ProfileDropdown";
 import Link from "next/link";
 import ConnectedDevicesCount from "@/components/ConnectedDevicesCount";
 import { getServerAuthSession } from "@/lib/authOptions";
-import Image from "next/image";
-import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
-import ContentUpdatingIndicator from "./ContentUpdatingIndicator";
+import { RiArrowLeftLine } from "react-icons/ri";
 import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import SecondaryNavbar from "./SecondaryNavbar";
 
 const loggedIn = false;
 
-const Navbar = () => {
-  // const authSession = await getServerAuthSession();
+const SecondaryNavbar = () => {
   const { data: authSession, status } = useSession();
-  const pathname = usePathname();
-
-  if (pathname === "/files") {
-    return <SecondaryNavbar />;
-  }
 
   return (
     <div className="navbar border-b">
-      <div className="flex-1 ml-2 md:ml-4">
-        <Link
-          href="/"
-          className="gap-0 relative block w-[72px] h-10 md:w-20 md:h-12"
-        >
-          <Image src="/echopad-logo.svg" alt="echopad" fill />
+      <div className="flex-1 md:ml-4">
+        <Link href="/" className="btn btn-square btn-ghost text-2xl">
+          <RiArrowLeftLine />
         </Link>
       </div>
       {status === "loading" ? (
@@ -38,7 +24,6 @@ const Navbar = () => {
         <div className="flex-none gap-2 mr-2 md:mr-4">
           {authSession?.user ? (
             <div className="flex gap-4 md:gap-6 items-center">
-              <ContentUpdatingIndicator />
               <ConnectedDevicesCount />
               <ProfileDropdown name={authSession?.user?.name} />
             </div>
@@ -53,4 +38,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default SecondaryNavbar;
