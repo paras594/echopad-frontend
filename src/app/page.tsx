@@ -37,7 +37,7 @@ export default async function Home() {
   return (
     <section className="grid relative" style={{ height: "calc(100vh - 72px)" }}>
       <div className="grid overflow-y-scroll">
-        <TextEditor2 />
+        <TextEditor2 key={Date.now()} />
       </div>
       <div className="fixed bottom-4 right-4">
         <Link
