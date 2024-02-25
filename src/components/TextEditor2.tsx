@@ -161,7 +161,7 @@ const TextEditor2 = () => {
   };
 
   useEffect(() => {
-    if (session) {
+    if (session && editor) {
       socketInitializer();
       fetchUserContent();
     }
@@ -169,7 +169,7 @@ const TextEditor2 = () => {
     return () => {
       socket?.close();
     };
-  }, [session]);
+  }, [session, editor]);
 
   return (
     <div>
