@@ -1,10 +1,11 @@
 "use client";
 
+import { fileTypeIcons } from "@/utils/file-type-icons";
 import { useSession } from "next-auth/react";
 import { revalidatePath } from "next/cache";
 import { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { PiDownloadSimple, PiFileLight, PiTrashSimple } from "react-icons/pi";
+import { PiDownloadSimple, PiTrashSimple } from "react-icons/pi";
 
 const FileCard = ({
   id,
@@ -44,6 +45,8 @@ const FileCard = ({
 
   const formattedDate = new Date(createdAt).toLocaleString();
 
+  const FileIcon = fileTypeIcons[format] || fileTypeIcons.default;
+
   return (
     <div
       className={`flex items-center gap-4 shadow border-t border-gray-100 rounded-lg py-3 px-3 ${
@@ -51,7 +54,7 @@ const FileCard = ({
       }`}
     >
       <div className="text-2xl text-primary">
-        <PiFileLight />
+        <FileIcon />
       </div>
       <div className="flex-1 grid">
         <p className="overflow-hidden text-ellipsis whitespace-nowrap mb-1">
@@ -70,10 +73,29 @@ const FileCard = ({
         )}
       </div>
       <div>
+        <div className="md:flex gap-2 hidden">
+          <a
+            href={fileUrl}
+            download
+            target="_blank"
+            className="text-black no-underline btn btn-ghost"
+          >
+            <span className="text-xl">
+              <PiDownloadSimple />
+            </span>
+            <p className="text-black font-semibold">Download</p>
+          </a>
+          <div onClick={handleDeleteClick} className="btn btn-ghost">
+            <span className="text-xl text-red-500">
+              <PiTrashSimple />
+            </span>
+            <p className="text-red-500 font-semibold">Delete</p>
+          </div>
+        </div>
         <details
           ref={fileCardDropdownRef}
           id="file-card-dropdown"
-          className={`dropdown dropdown-end`}
+          className={`dropdown dropdown-end md:hidden`}
         >
           <summary className="m-1 btn btn-sm btn-square btn-ghost text-xl">
             <HiOutlineDotsVertical />

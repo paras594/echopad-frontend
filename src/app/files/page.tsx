@@ -6,9 +6,11 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PiInfo } from "react-icons/pi";
 import autoAnimate from "@formkit/auto-animate";
+import { useRouter } from "next/navigation";
 
 const Files = () => {
   const { data: session } = useSession();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const filesListRef = useRef<HTMLDivElement>(null);
   const [uploadingFile, setUploadingFile] = useState({
@@ -158,11 +160,26 @@ const Files = () => {
     }
   };
 
+  if (!session) return router.replace("/login");
+
   return (
     <div className="mt-4 overflow-y-auto scrollable-content h-[80vh] md:h-screen">
       <Container>
         <div className="flex justify-between items-center">
-          <h1 className="text-lg">Files Manager</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg">Files Manager</h1>
+            <details className="dropdown dropdown-start">
+              <summary className="btn btn-sm btn-square text-xl btn-ghost text-gray-500">
+                <PiInfo />
+              </summary>
+              <div className="px-4 py-4 mt-1 -translate-x-1/2 md:translate-x-0 shadow dropdown-content z-[1] bg-base-100 rounded-lg w-64 md:w-72">
+                <ul className="list-disc pl-4 text-xs md:text-sm">
+                  <li className="mb-2">Files will be deleted after 12 hours</li>
+                  <li>Max file size is 10MB</li>
+                </ul>
+              </div>
+            </details>
+          </div>
           <button
             disabled={!session}
             onClick={handleUploadNewFileClick}
@@ -170,14 +187,6 @@ const Files = () => {
           >
             Upload File
           </button>
-        </div>
-        <div className="flex items-center gap-1 mt-1 md:mt-0 text-gray-400">
-          <span className="md:text-lg">
-            <PiInfo />
-          </span>
-          <span className="text-xs md:text-sm">
-            Files will be deleted after 12 hours
-          </span>
         </div>
 
         <div className="mt-6 flex flex-col gap-4" ref={filesListRef}>

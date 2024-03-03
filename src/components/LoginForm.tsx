@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 
 const LoginForm = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -24,6 +25,7 @@ const LoginForm = () => {
   const handleSubmit = async (event: any) => {
     event.preventDefault();
     try {
+      setLoading(true);
       const result = await signIn("credentials", {
         email: state.email,
         password: state.password,
@@ -41,6 +43,8 @@ const LoginForm = () => {
       }
     } catch (error) {
       console.log({ error });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,6 +60,7 @@ const LoginForm = () => {
           name="email"
           placeholder="Email"
           onChange={handleChange}
+          required
           value={state.email}
           className="input input-bordered w-full"
         />
@@ -69,6 +74,7 @@ const LoginForm = () => {
           name="password"
           placeholder="Password"
           onChange={handleChange}
+          required
           value={state.password}
           className="input input-bordered w-full"
         />
@@ -76,7 +82,14 @@ const LoginForm = () => {
           <InputErrorLabel errorMsg={state.errors.password} />
         )}
       </div>
-      <button className="btn btn-secondary">Login</button>
+      {loading ? (
+        <button type="button" className="btn btn-secondary">
+          <span className="loading loading-spinner"></span>
+          Logging In
+        </button>
+      ) : (
+        <button className="btn btn-secondary">Login</button>
+      )}
       {state?.errors?.error && (
         <div role="alert" className="alert bg-red-100 border border-red-200">
           <HiOutlineExclamationTriangle className="text-xl" />
