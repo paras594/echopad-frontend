@@ -6,11 +6,10 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PiInfo } from "react-icons/pi";
 import autoAnimate from "@formkit/auto-animate";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 const Files = () => {
   const { data: session } = useSession();
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const filesListRef = useRef<HTMLDivElement>(null);
   const [uploadingFile, setUploadingFile] = useState({
@@ -160,7 +159,7 @@ const Files = () => {
     }
   };
 
-  if (!session) return router.replace("/login");
+  if (!session) return redirect("/login");
 
   return (
     <div className="mt-4 overflow-y-auto scrollable-content h-[80vh] md:h-screen">
