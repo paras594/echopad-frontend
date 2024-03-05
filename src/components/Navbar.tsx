@@ -10,6 +10,7 @@ import ContentUpdatingIndicator from "./ContentUpdatingIndicator";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import SecondaryNavbar from "./SecondaryNavbar";
+import InstallPWABtn from "./InstallPWABtn";
 
 const loggedIn = false;
 
