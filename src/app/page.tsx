@@ -10,7 +10,12 @@ const TextEditor2 = dynamic(() => import("@/components/TextEditor2"), {
 import { getServerAuthSession } from "@/lib/authOptions";
 import Link from "next/link";
 import { PiFiles } from "react-icons/pi";
-import InstallPWAFloatingBtn from "@/components/InstallPWAFloatingBtn";
+const InstallPWAFloatingBtn = dynamic(
+  () => import("@/components/InstallPWAFloatingBtn"),
+  {
+    ssr: false,
+  }
+);
 
 export default async function Home() {
   const authSession = await getServerAuthSession();

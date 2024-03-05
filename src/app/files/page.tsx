@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PiInfo } from "react-icons/pi";
 import autoAnimate from "@formkit/auto-animate";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 const Files = () => {
   const { data: session } = useSession();
