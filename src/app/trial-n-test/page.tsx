@@ -1,5 +1,8 @@
-"use client";
-import InstallPWABtn from "@/components/InstallPWABtn";
+import dynamic from "next/dynamic";
+
+const InstallPWABtn = dynamic(() => import("@/components/InstallPWABtn"), {
+  ssr: false,
+});
 
 const TrialNTest = () => {
   return (
