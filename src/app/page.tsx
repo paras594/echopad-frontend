@@ -10,6 +10,7 @@ const TextEditor2 = dynamic(() => import("@/components/TextEditor2"), {
 import { getServerAuthSession } from "@/lib/authOptions";
 import Link from "next/link";
 import { PiFiles } from "react-icons/pi";
+import InstallPWAFloatingBtn from "@/components/InstallPWAFloatingBtn";
 
 export default async function Home() {
   const authSession = await getServerAuthSession();
@@ -39,10 +40,11 @@ export default async function Home() {
       <div className="grid overflow-y-scroll">
         <TextEditor2 key={Date.now()} />
       </div>
-      <div className="fixed bottom-4 right-4">
+      <div className="fixed flex flex-col gap-4 items-center bottom-4 right-4 md:right-6">
+        <InstallPWAFloatingBtn />
         <Link
           href="/files"
-          className="btn btn-circle btn-lg btn-primary text-2xl"
+          className="btn btn-circle w-14 h-14 md:btn-lg btn-primary !text-2xl"
         >
           <PiFiles />
         </Link>
