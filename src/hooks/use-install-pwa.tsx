@@ -27,7 +27,7 @@ const useInstallPWA = () => {
         setDefferedPrompt(null);
       }
     }
-  }, [window]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (defferedPrompt) {
