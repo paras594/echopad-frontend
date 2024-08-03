@@ -10,9 +10,16 @@ class CustomError extends Error {
   }
 }
 
+function getExpiryTime() {
+  if (process.env.NEXTAUTH_JWT_EXPIRES_IN)
+    return 60 * 60 * 24 * +process.env.NEXTAUTH_JWT_EXPIRES_IN; // 90 days
+  return 60 * 60 * 24 * 90;
+}
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt", //(1)
+    maxAge: getExpiryTime(),
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {

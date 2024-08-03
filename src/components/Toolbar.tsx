@@ -63,7 +63,6 @@ const Toolbar = ({ editor }: { editor: any }) => {
         <select
           name="heading"
           id="heading"
-          defaultValue="paragraph"
           className="rounded bg-white"
           value={editor?.getAttributes("heading").level || "paragraph"}
           onChange={(e) => {

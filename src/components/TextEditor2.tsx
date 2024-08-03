@@ -3,7 +3,7 @@
 import useStore from "@/lib/useStore";
 import { useEditor, EditorContent, markPasteRule } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import io from "socket.io-client";
 import Toolbar from "@/components/Toolbar";
@@ -45,6 +45,9 @@ const TextEditor2 = () => {
 
       const data = await res.json();
       if (!res.ok) {
+        if (data.message === "Unauthorized") {
+          signOut();
+        }
         console.log({
           errorOccured: data,
         });
