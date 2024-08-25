@@ -16,6 +16,7 @@ const Files = () => {
     uploading: false,
     progress: 0,
     fileName: "",
+    filesCount: 0,
   });
   const [loadingUserFiles, setLoadingUserFiles] = useState(false);
   const [userFiles, setUserFiles] = useState<any[]>([]);
@@ -65,17 +66,20 @@ const Files = () => {
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    console.log({ file });
+    const files = Array.prototype.slice.call(event.target.files);
+    if (!files.length) return;
+
     const data = new FormData();
 
-    data.append("file", file!);
+    files.forEach((file) => {
+      data.append("files", file);
+    });
 
     setUploadingFile({
       uploading: true,
       progress: 0,
-      fileName: file.name,
+      fileName: files.map((file) => file.name).join(", "),
+      filesCount: files.length,
     });
 
     const xhr = new XMLHttpRequest();
@@ -86,6 +90,7 @@ const Files = () => {
         uploading: false,
         progress: 0,
         fileName: "",
+        filesCount: 0,
       });
       fetchUserFiles();
     };
@@ -96,6 +101,7 @@ const Files = () => {
         uploading: false,
         progress: 0,
         fileName: "",
+        filesCount: 0,
       });
     };
 
@@ -211,6 +217,7 @@ const Files = () => {
               uploading={uploadingFile.uploading}
               fileName={uploadingFile.fileName}
               progress={uploadingFile.progress}
+              filesCount={uploadingFile.filesCount}
             />
           )}
           {userFiles.map((file) => (
@@ -242,6 +249,7 @@ const Files = () => {
               key={Date.now()}
               onChange={handleFileInputChange}
               className="hidden"
+              multiple
             />
             <button
               disabled={!session}

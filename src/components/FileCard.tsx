@@ -2,7 +2,6 @@
 
 import { fileTypeIcons } from "@/utils/file-type-icons";
 import { useSession } from "next-auth/react";
-import { revalidatePath } from "next/cache";
 import { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { PiDownloadSimple, PiTrashSimple } from "react-icons/pi";
@@ -12,6 +11,7 @@ const FileCard = ({
   uploading,
   progress,
   fileName,
+  filesCount,
   createdAt,
   fileUrl,
   resourceType,
@@ -20,7 +20,6 @@ const FileCard = ({
   onDelete,
   deleting,
 }: any) => {
-  const { data: session } = useSession();
   const fileCardDropdownRef = useRef<any>(null);
 
   useEffect(() => {
@@ -60,12 +59,18 @@ const FileCard = ({
         <p className="overflow-hidden text-ellipsis whitespace-nowrap mb-1">
           {fileName}
         </p>
+
         {uploading ? (
-          <progress
-            className="progress w-full md:max-w-xs h-1 progress-info"
-            value={progress || 0}
-            max="100"
-          ></progress>
+          <div className="flex items-center gap-2">
+            <p className="text-xs whitespace-nowrap">
+              {filesCount} file{filesCount > 1 && "s"}
+            </p>
+            <progress
+              className="progress w-full md:max-w-xs h-1 progress-info"
+              value={progress || 0}
+              max="100"
+            ></progress>
+          </div>
         ) : deleting ? (
           <p className="text-red-500 text-xs">Deleting</p>
         ) : (
