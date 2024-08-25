@@ -42,6 +42,19 @@ const FileCard = ({
     onDelete();
   };
 
+  const handleFileDownload = async () => {
+    const blob = await fetch(fileUrl).then((res) => res.blob());
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = fileName;
+    a.click();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+    });
+  };
+
   const formattedDate = new Date(createdAt).toLocaleString();
 
   const FileIcon = fileTypeIcons[format] || fileTypeIcons.default;
@@ -79,17 +92,15 @@ const FileCard = ({
       </div>
       <div>
         <div className="md:flex gap-2 hidden">
-          <a
-            href={fileUrl}
-            download
-            target="_blank"
+          <button
+            onClick={handleFileDownload}
             className="text-black no-underline btn btn-ghost"
           >
             <span className="text-xl">
               <PiDownloadSimple />
             </span>
             <p className="text-black font-semibold">Download</p>
-          </a>
+          </button>
           <div onClick={handleDeleteClick} className="btn btn-ghost">
             <span className="text-xl text-red-500">
               <PiTrashSimple />
@@ -107,10 +118,8 @@ const FileCard = ({
           </summary>
           <ul className="p-2 border-t mt-2 border-gray-100 shadow menu gap-2 dropdown-content z-[1] bg-base-100 rounded-lg w-52">
             <li onClick={() => (fileCardDropdownRef.current.open = false)}>
-              <a
-                href={fileUrl}
-                download
-                target="_blank"
+              <button
+                onClick={handleFileDownload}
                 className="text-black no-underline"
               >
                 <div className="flex flex-row items-center gap-4">
@@ -119,7 +128,7 @@ const FileCard = ({
                   </span>
                   <p className="text-black font-semibold">Download</p>
                 </div>
-              </a>
+              </button>
             </li>
             <li onClick={handleDeleteClick}>
               <div className="flex flex-row items-center gap-4">
