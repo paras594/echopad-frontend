@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^2.2.2",
     "clsx": "^2.1.0",
     "daisyui": "4.6.2",
+    "firebase": "^10.13.0",
     "lodash.debounce": "^4.0.8",
     "next": "14.1.0",
     "next-auth": "^4.24.5",

@@ -12,18 +12,22 @@ import { usePathname } from "next/navigation";
 import SecondaryNavbar from "./SecondaryNavbar";
 import { PiDownload } from "react-icons/pi";
 import useInstallPWA from "@/hooks/use-install-pwa";
+import { useAuth } from "@/contexts/auth-context";
 
 const loggedIn = false;
 
 const Navbar = () => {
   // const authSession = await getServerAuthSession();
   const { data: authSession, status } = useSession();
+  const { user, loading } = useAuth();
   const pathname = usePathname();
   const { handleInstallClick, isInstalled } = useInstallPWA();
 
   if (pathname === "/files") {
     return <SecondaryNavbar />;
   }
+
+  console.log({ user, loading });
 
   return (
     <div className="navbar border-b">
@@ -36,12 +40,12 @@ const Navbar = () => {
         </Link>
       </div>
       <div></div>
-      {status === "loading" ? (
+      {loading ? (
         <span className="loading loading-spinner text-gray-300 loading-md mr-2 md:mr-4"></span>
       ) : (
         <div className="flex-none gap-2 mr-2 md:mr-4">
           <div className="flex gap-4 md:gap-4 items-center">
-            {authSession?.user && <ContentUpdatingIndicator />}
+            {user && <ContentUpdatingIndicator />}
             {!isInstalled && (
               <button
                 onClick={handleInstallClick}
@@ -53,14 +57,14 @@ const Navbar = () => {
                 Install
               </button>
             )}
-            {authSession?.user && (
+            {user && (
               <>
                 <ConnectedDevicesCount />
-                <ProfileDropdown name={authSession?.user?.name} />
+                <ProfileDropdown name={user.displayName} />
               </>
             )}
           </div>
-          {!authSession?.user && (
+          {!user && (
             <Link href="/login" className="btn ml-4">
               Login
             </Link>
