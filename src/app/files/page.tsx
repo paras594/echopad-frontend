@@ -17,6 +17,7 @@ const Files = () => {
     uploading: false,
     progress: 0,
     fileName: "",
+    filesCount: 0,
   });
   const [loadingUserFiles, setLoadingUserFiles] = useState(false);
   const [userFiles, setUserFiles] = useState<any[]>([]);
@@ -67,20 +68,21 @@ const Files = () => {
   ) => {
     if (!user) return;
 
-    const files = event.target.files;
+    const files = Array.prototype.slice.call(event.target.files);
 
     if (!files || files.length === 0) return;
 
     const data = new FormData();
 
-    for (let i = 0; i < files.length; i++) {
-      data.append("files", files[i]);
-    }
+    files.forEach((file) => {
+      data.append("files", file);
+    });
 
     setUploadingFile({
       uploading: true,
       progress: 0,
-      fileName: `Files (${files.length})`,
+      fileName: files.map((file) => file.name).join(", "),
+      filesCount: files.length,
     });
 
     const idToken = await getIdToken(user);
@@ -92,6 +94,7 @@ const Files = () => {
         uploading: false,
         progress: 0,
         fileName: "",
+        filesCount: 0,
       });
       fetchUserFiles();
     };
@@ -102,6 +105,7 @@ const Files = () => {
         uploading: false,
         progress: 0,
         fileName: "",
+        filesCount: 0,
       });
     };
 
@@ -214,6 +218,7 @@ const Files = () => {
               uploading={uploadingFile.uploading}
               fileName={uploadingFile.fileName}
               progress={uploadingFile.progress}
+              filesCount={uploadingFile.filesCount}
             />
           )}
           {userFiles.map((file) => (
@@ -224,6 +229,7 @@ const Files = () => {
               uploading={false}
               deleting={deletingFile === file._id}
               fileName={file.fileName}
+              filesCount={file.filesCount}
               fileUrl={file.fileUrl}
               publicId={file.publicId}
               format={file.format}
