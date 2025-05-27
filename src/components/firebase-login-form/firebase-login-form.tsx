@@ -4,12 +4,18 @@ import React, { useState } from "react";
 import InputErrorLabel from "../InputErrorLabel";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import Link from "next/link";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "@/lib/configs/firebase-config";
 import { validateLogin } from "@/utils/validators";
 import { firebaseAuthErrors } from "@/utils/firebase-auth-errors";
+import { useRouter } from "next/navigation";
 
 const FirebaseLoginForm = () => {
+  const router = useRouter();
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -49,7 +55,53 @@ const FirebaseLoginForm = () => {
         setLoading(false);
       }
     } catch (error: any) {
-      if (error.code in firebaseAuthErrors) {
+      const errorCode = error.code as keyof typeof firebaseAuthErrors;
+      if (
+        firebaseAuthErrors[errorCode] ===
+          firebaseAuthErrors["auth/invalid-credential"] ||
+        firebaseAuthErrors[errorCode] ===
+          firebaseAuthErrors["auth/user-not-found"]
+      ) {
+        // find user by email in db
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/auth/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setState((values) => ({
+            ...values,
+            errors: data.errors,
+          }));
+        } else {
+          // need to migrate user to firebase
+          await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(auth?.currentUser as any, {
+            displayName: data.user.name,
+          });
+
+          await fetch(
+            `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/migrate-user-data`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ newId: auth?.currentUser?.uid, email }),
+            }
+          );
+
+          router.push("/");
+        }
+      } else if (error.code in firebaseAuthErrors) {
         setState((values) => ({
           ...values,
           errors: {

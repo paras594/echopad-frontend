@@ -6,10 +6,11 @@ export const validateLogin = (email: string, password: string) => {
     errors.email = "Invalid email address";
   }
 
+  const passwordLength = 6;
   if (!password) {
     errors.password = "Password is required";
-  } else if (password.length < 6) {
-    errors.password = "Password must be at least 6 characters";
+  } else if (password.length < passwordLength) {
+    errors.password = `Password must be at least ${passwordLength} characters`;
   }
   return errors;
 };

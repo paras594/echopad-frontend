@@ -3,13 +3,10 @@
 import ProfileDropdown from "@/components/ProfileDropdown";
 import Link from "next/link";
 import ConnectedDevicesCount from "@/components/ConnectedDevicesCount";
-import { getServerAuthSession } from "@/lib/authOptions";
 import Image from "next/image";
-import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
-import ContentUpdatingIndicator from "./ContentUpdatingIndicator";
-import { useSession } from "next-auth/react";
+import ContentUpdatingIndicator from "../ContentUpdatingIndicator";
 import { usePathname } from "next/navigation";
-import SecondaryNavbar from "./SecondaryNavbar";
+import SecondaryNavbar from "../SecondaryNavbar";
 import { PiDownload } from "react-icons/pi";
 import useInstallPWA from "@/hooks/use-install-pwa";
 import { useAuth } from "@/contexts/auth-context";
@@ -17,8 +14,6 @@ import { useAuth } from "@/contexts/auth-context";
 const loggedIn = false;
 
 const Navbar = () => {
-  // const authSession = await getServerAuthSession();
-  const { data: authSession, status } = useSession();
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const { handleInstallClick, isInstalled } = useInstallPWA();
@@ -26,8 +21,6 @@ const Navbar = () => {
   if (pathname === "/files") {
     return <SecondaryNavbar />;
   }
-
-  console.log({ user, loading });
 
   return (
     <div className="navbar border-b">

@@ -1,15 +1,16 @@
 "use client";
 import Container from "@/components/Container";
 import FileCard from "@/components/FileCard";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PiInfo } from "react-icons/pi";
 import autoAnimate from "@formkit/auto-animate";
 import { redirect } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import { getIdToken } from "firebase/auth";
 
 const Files = () => {
-  const { data: session } = useSession();
+  const { user, loading } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const filesListRef = useRef<HTMLDivElement>(null);
   const [uploadingFile, setUploadingFile] = useState({
@@ -22,16 +23,17 @@ const Files = () => {
   const [deletingFile, setDeletingFile] = useState("");
 
   const fetchUserFiles = useCallback(async () => {
-    if (!session) return;
+    if (!user) return;
     setLoadingUserFiles(true);
+
+    const idToken = await getIdToken(user);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // @ts-ignore
-          authorization: `Bearer ${session?.user?.access_token}`,
+          authorization: `Bearer ${idToken}`,
         },
       }
     );
@@ -44,40 +46,44 @@ const Files = () => {
 
     setUserFiles(data.userFiles);
     setLoadingUserFiles(false);
-
-    console.log({ data });
-  }, [session]);
+  }, [user]);
 
   useEffect(() => {
     filesListRef.current && autoAnimate(filesListRef.current);
   }, [filesListRef]);
 
   useEffect(() => {
-    if (!session) return;
+    if (!user) return;
 
     fetchUserFiles();
-  }, [session, fetchUserFiles]);
+  }, [user, fetchUserFiles]);
 
   const handleUploadNewFileClick = () => {
     fileInputRef?.current?.click();
   };
 
-  const handleFileInputChange = (
+  const handleFileInputChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    console.log({ file });
+    if (!user) return;
+
+    const files = event.target.files;
+
+    if (!files || files.length === 0) return;
+
     const data = new FormData();
 
-    data.append("file", file!);
+    for (let i = 0; i < files.length; i++) {
+      data.append("files", files[i]);
+    }
 
     setUploadingFile({
       uploading: true,
       progress: 0,
-      fileName: file.name,
+      fileName: `Files (${files.length})`,
     });
 
+    const idToken = await getIdToken(user);
     const xhr = new XMLHttpRequest();
 
     xhr.onload = () => {
@@ -120,27 +126,23 @@ const Files = () => {
       `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files/upload`
     );
 
-    xhr.setRequestHeader(
-      "authorization",
-      // @ts-ignore
-      `Bearer ${session?.user?.access_token}`
-    );
+    xhr.setRequestHeader("authorization", `Bearer ${idToken}`);
 
     xhr.send(data);
   };
 
   const handleDeleteFile = (fileId: string) => async () => {
-    if (!session) return;
+    if (!user) return;
     try {
       setDeletingFile(fileId);
+      const idToken = await getIdToken(user);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files/${fileId}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            // @ts-ignore
-            authorization: `Bearer ${session?.user?.access_token}`,
+            authorization: `Bearer ${idToken}`,
           },
         }
       );
@@ -159,7 +161,7 @@ const Files = () => {
     }
   };
 
-  if (!session) return redirect("/login");
+  if (!loading && !user) return redirect("/login");
 
   return (
     <div className="mt-4 overflow-y-auto scrollable-content h-[80vh] md:h-screen">
@@ -174,13 +176,13 @@ const Files = () => {
               <div className="px-4 py-4 mt-1 -translate-x-1/2 md:translate-x-0 shadow dropdown-content z-[1] bg-base-100 rounded-lg w-64 md:w-72">
                 <ul className="list-disc pl-4 text-xs md:text-sm">
                   <li className="mb-2">Files will be deleted after 12 hours</li>
-                  <li>Max file size is 10MB</li>
+                  <li>Max files size is 20MB</li>
                 </ul>
               </div>
             </details>
           </div>
           <button
-            disabled={!session}
+            disabled={!user}
             onClick={handleUploadNewFileClick}
             className="btn btn-primary hidden md:flex"
           >
@@ -189,7 +191,8 @@ const Files = () => {
         </div>
 
         <div className="mt-6 flex flex-col gap-4" ref={filesListRef}>
-          {!loadingUserFiles &&
+          {!loading &&
+            !loadingUserFiles &&
             !userFiles.length &&
             !uploadingFile.uploading && (
               <div>
@@ -242,9 +245,10 @@ const Files = () => {
               key={Date.now()}
               onChange={handleFileInputChange}
               className="hidden"
+              multiple
             />
             <button
-              disabled={!session}
+              disabled={!user}
               onClick={handleUploadNewFileClick}
               className="btn btn-block md:btn-wide btn-primary"
             >
