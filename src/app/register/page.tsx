@@ -12,6 +12,7 @@ const Register = () => {
         </h1>
         {/* <RegisterForm /> */}
         <FirebaseRegisterForm />
+        <p className="text-center mt-20 text-gray-300">v2.0</p>
       </Container>
     </div>
   );
