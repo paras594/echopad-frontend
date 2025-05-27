@@ -1,17 +1,19 @@
 "use client";
 import React from "react";
-import { signOut } from "next-auth/react";
-
-// const logout = async () => {
-//   "use server";
-//   const cookieStore = cookies();
-//   cookieStore.delete("jwt");
-//   cookieStore.delete("name");
-//   cookieStore.delete("email");
-//   revalidatePath("/");
-// };
+import { getAuth, signOut } from "firebase/auth";
 
 const ProfileDropdown = ({ name }: any) => {
+  const auth = getAuth();
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "/";
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="dropdown dropdown-end">
       <button tabIndex={0} role="button" className="flex gap-2 items-center">
@@ -31,7 +33,7 @@ const ProfileDropdown = ({ name }: any) => {
         className="mt-3 z-[99] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
       >
         <p className="text-lg p-4">{name}</p>
-        <button onClick={() => signOut()} className="btn btn-block btn-primary">
+        <button onClick={() => logout()} className="btn btn-block btn-primary">
           Logout
         </button>
       </div>

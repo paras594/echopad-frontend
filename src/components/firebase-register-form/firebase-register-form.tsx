@@ -6,6 +6,8 @@ import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import InputErrorLabel from "@/components/InputErrorLabel";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/configs/firebase-config";
+import { validateRegister } from "@/utils/validators";
+import { firebaseAuthErrors } from "@/utils/firebase-auth-errors";
 
 function RegisterBtn({ pending }: { pending: boolean }) {
   if (pending)
@@ -23,7 +25,7 @@ function RegisterBtn({ pending }: { pending: boolean }) {
   );
 }
 
-const RegisterForm = () => {
+const FirebaseRegisterForm = () => {
   const [state, setState] = useState({
     name: "",
     email: "",
@@ -32,6 +34,7 @@ const RegisterForm = () => {
     errors: {} as any,
   });
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event: any) => {
     setState({
@@ -42,7 +45,17 @@ const RegisterForm = () => {
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
-    const { name, email, password } = state;
+    const { name, email, password, confirmPassword } = state;
+
+    setLoading(true);
+
+    const errors = validateRegister(name, email, password, confirmPassword);
+    if (Object.keys(errors).length > 0) {
+      setState((values) => ({ ...values, errors }));
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
       console.log({ res });
@@ -50,16 +63,26 @@ const RegisterForm = () => {
         displayName: name,
       });
       router.push("/");
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.code in firebaseAuthErrors) {
+        setState((values) => ({
+          ...values,
+          errors: {
+            error:
+              firebaseAuthErrors[error.code as keyof typeof firebaseAuthErrors],
+          },
+        }));
+      } else {
+        setState((values) => ({
+          ...values,
+          errors: {
+            error: "Something went wrong. Please try again.",
+          },
+        }));
+      }
+      setLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   if (state?.success) {
-  //     router.push("/login");
-  //   }
-  // }, [state?.success, router]);
 
   console.log({ state });
 
@@ -120,7 +143,7 @@ const RegisterForm = () => {
           <InputErrorLabel errorMsg={state.errors.confirmPassword} />
         )}
       </div>
-      <RegisterBtn pending={false} />
+      <RegisterBtn pending={loading} />
       {state?.errors?.error && (
         <div role="alert" className="alert bg-red-100 border border-red-200">
           <HiOutlineExclamationTriangle className="text-xl" />
@@ -137,4 +160,4 @@ const RegisterForm = () => {
   );
 };
 
-export default RegisterForm;
+export default FirebaseRegisterForm;

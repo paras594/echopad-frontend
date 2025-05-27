@@ -3,6 +3,7 @@
 import useStore from "@/lib/useStore";
 import { useEditor, EditorContent, markPasteRule } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect } from "react";
 import io from "socket.io-client";
 import Toolbar from "@/components/Toolbar";
@@ -12,48 +13,15 @@ import Placeholder from "@tiptap/extension-placeholder";
 import debounce from "lodash.debounce";
 import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
 import { useAuth } from "@/contexts/auth-context";
-import { getAuth, getIdToken, signOut } from "firebase/auth";
 
 let socket: any;
 
-const TextEditor2 = () => {
-  const auth = getAuth();
+const MainEditor = () => {
   const { user, loading } = useAuth();
   const setRoomCount = useStore((state: any) => state.setRoomCount);
   const { setIsUpdating } = useUpdatingContentStore((state: any) => state);
 
-  const updateContent = async (content: any) => {
-    if (!user) return;
-    setIsUpdating(true);
-
-    try {
-      const idToken = await getIdToken(user);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: `Bearer ${idToken}`,
-          },
-          body: JSON.stringify({
-            content,
-          }),
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.message === "Unauthorized") {
-          await signOut(auth);
-        }
-      }
-    } catch (error) {
-      console.log({ error });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const updateContent = async (content: any) => {};
 
   const debouncedUpdateContent = useCallback(debounce(updateContent, 1500), [
     user,
@@ -81,62 +49,29 @@ const TextEditor2 = () => {
     ],
     autofocus: true,
     editable: true,
+    // onCreate: ({ editor }) => {
+
+    // },
     onUpdate: ({ editor }) => {
       if (!user) return;
-
-      socket.emit("input-change", {
-        text: editor?.getHTML(),
-        email: user?.email,
-        senderid: socket.id,
-      });
 
       debouncedUpdateContent(editor?.getHTML());
     },
   });
 
-  const socketInitializer = async () => {
-    if (!process.env.NEXT_PUBLIC_SOCKET_V1_URL) return;
-    const email = user?.email;
-    socket = io(process.env.NEXT_PUBLIC_SOCKET_V1_URL, { email } as any);
-
-    socket?.emit("register-user", { email });
-
-    socket.on("user-joined-room", (data: any) => {
-      setRoomCount(data.roomCount);
-
-      const editorIsEmpty = !editor?.state?.doc?.textContent?.trim()?.length;
-
-      if (editorIsEmpty) return;
-
-      // socket.emit("input-change", {
-      //   text: editor?.getHTML(),
-      //   email,
-      //   senderid: socket.id,
-      // });
-    });
-
-    socket.on("user-left-room", (data: any) => {
-      setRoomCount(data.roomCount);
-    });
-
-    socket.on("input-change", (data: any) => {
-      editor?.commands?.setContent(data.text);
-    });
-  };
+  const socketInitializer = async () => {};
 
   const fetchUserContent = async () => {
-    if (!user) return;
-
     setIsUpdating(true);
     try {
-      const idToken = await getIdToken(user);
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-content`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            authorization: `Bearer ${idToken}`,
+            // @ts-ignore
+            authorization: `Bearer ${session?.user?.access_token}`,
           },
         }
       );
@@ -158,7 +93,7 @@ const TextEditor2 = () => {
   };
 
   useEffect(() => {
-    if (!loading && user && editor) {
+    if (user && editor) {
       socketInitializer();
       fetchUserContent();
     }
@@ -166,7 +101,7 @@ const TextEditor2 = () => {
     return () => {
       socket?.close();
     };
-  }, [user, loading, editor]);
+  }, [user, editor]);
 
   return (
     <div>
@@ -181,4 +116,4 @@ const TextEditor2 = () => {
   );
 };
 
-export default TextEditor2;
+export default MainEditor;
