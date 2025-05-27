@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider as NextAuthProvider } from "@/components/AuthProvider";
 import Navbar from "@/components/navbar/navbar";
 import { AuthProvider } from "@/contexts/auth-context";
 
@@ -41,12 +40,10 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen overflow-hidden flex flex-col`}
       >
-        <NextAuthProvider>
-          <AuthProvider>
-            <Navbar />
-            <div className="flex-1">{children}</div>
-          </AuthProvider>
-        </NextAuthProvider>
+        <AuthProvider>
+          <Navbar />
+          <div className="flex-1">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
