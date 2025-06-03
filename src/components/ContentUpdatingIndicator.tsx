@@ -1,19 +1,21 @@
 "use client";
 
-import useUpdatingContentStore from "@/lib/useUpdatingContentStore";
+import useStore from "@/lib/useStore";
 import { useEffect, useRef, useState } from "react";
 import { AiOutlineSync } from "react-icons/ai";
 import { BsCloudCheck } from "react-icons/bs";
 
 const ContentUpdatingIndicator = () => {
-  const { isUpdating } = useUpdatingContentStore((state: any) => state);
+  const isUpdatingUserContent = useStore(
+    (state) => state.isUpdatingUserContent,
+  );
   const [hide, setHide] = useState(false);
   const timeoutRef = useRef<any>(null);
 
   useEffect(() => {
     clearTimeout(timeoutRef.current);
-    if (isUpdating) setHide(false);
-    if (!isUpdating) {
+    if (isUpdatingUserContent) setHide(false);
+    if (!isUpdatingUserContent) {
       timeoutRef.current = setTimeout(() => {
         setHide(true);
       }, 2000);
@@ -24,15 +26,13 @@ const ContentUpdatingIndicator = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isUpdating]);
+  }, [isUpdatingUserContent]);
 
   return (
     <div
-      className={`transition duration-300 ${
-        hide ? "opacity-0" : "opacity-100"
-      }`}
+      className={`transition duration-300 ${hide ? "opacity-0" : "opacity-100"}`}
     >
-      {isUpdating ? (
+      {isUpdatingUserContent ? (
         <span className="animate-spin block text-lg">
           <AiOutlineSync />
         </span>

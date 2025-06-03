@@ -1,5 +1,3 @@
-import React from "react";
-
 const InputErrorLabel = ({ errorMsg }: any) => {
   return (
     <div className="label">

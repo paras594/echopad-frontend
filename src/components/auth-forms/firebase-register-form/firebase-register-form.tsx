@@ -3,27 +3,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
-import InputErrorLabel from "@/components/InputErrorLabel";
+import InputErrorLabel from "@/components/auth-forms/InputErrorLabel";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/configs/firebase-config";
 import { validateRegister } from "@/utils/validators";
 import { firebaseAuthErrors } from "@/utils/firebase-auth-errors";
-
-function RegisterBtn({ pending }: { pending: boolean }) {
-  if (pending)
-    return (
-      <button type="button" className="btn btn-secondary">
-        <span className="loading loading-spinner"></span>
-        Registering
-      </button>
-    );
-
-  return (
-    <button className="btn btn-secondary" type="submit">
-      Register
-    </button>
-  );
-}
+import FormSubmitBtn from "../FormSubmitBtn";
 
 const FirebaseRegisterForm = () => {
   const [state, setState] = useState({
@@ -57,12 +42,11 @@ const FirebaseRegisterForm = () => {
     }
 
     try {
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      console.log({ res });
+      await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(auth?.currentUser as any, {
         displayName: name,
       });
-      router.push("/");
+      router.replace("/");
     } catch (error: any) {
       if (error.code in firebaseAuthErrors) {
         setState((values) => ({
@@ -83,8 +67,6 @@ const FirebaseRegisterForm = () => {
       setLoading(false);
     }
   };
-
-  console.log({ state });
 
   return (
     <form
@@ -143,13 +125,18 @@ const FirebaseRegisterForm = () => {
           <InputErrorLabel errorMsg={state.errors.confirmPassword} />
         )}
       </div>
-      <RegisterBtn pending={loading} />
+
+      <FormSubmitBtn isSubmitting={loading}>
+        {loading ? "Registering..." : "Register"}
+      </FormSubmitBtn>
+
       {state?.errors?.error && (
         <div role="alert" className="alert bg-red-100 border border-red-200">
           <HiOutlineExclamationTriangle className="text-xl" />
           <span>{state.errors.error}</span>
         </div>
       )}
+
       <div className="text-center mt-4">
         Already have an account?{" "}
         <Link className="link" href="/login">

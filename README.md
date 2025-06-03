@@ -13,7 +13,7 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Project Details
 
-- Tailwind + Daisyui for styling
+- Tailwind + Daisyui + `global.css` for styling
 - Uses firebase authentication (email/password)
 - Deployed on Vercel [https://echopad.vercel.app](https://echopad.vercelapp)
 - Has PWA support enabled

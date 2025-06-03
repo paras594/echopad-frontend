@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
-import InputErrorLabel from "../InputErrorLabel";
-import { HiOutlineExclamationTriangle } from "react-icons/hi2";
+import { useState } from "react";
 import Link from "next/link";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
+import { redirect, useRouter } from "next/navigation";
 import { auth } from "@/lib/configs/firebase-config";
 import { validateLogin } from "@/utils/validators";
 import { firebaseAuthErrors } from "@/utils/firebase-auth-errors";
-import { useRouter } from "next/navigation";
+import FormSubmitBtn from "../FormSubmitBtn";
+import InputErrorLabel from "../InputErrorLabel";
+import ErrorAlert from "../ErrorAlert";
 
 const FirebaseLoginForm = () => {
   const router = useRouter();
@@ -31,6 +32,61 @@ const FirebaseLoginForm = () => {
     });
   };
 
+  const migrateUser = async (email: string, password: string) => {
+    try {
+      // check if user exists
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setState((values) => ({
+          ...values,
+          errors: data.errors,
+        }));
+      } else {
+        // need to migrate user to firebase
+        await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(auth?.currentUser as any, {
+          displayName: data.user.name,
+        });
+
+        await fetch(
+          `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/migrate-user-data`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ newId: auth?.currentUser?.uid, email }),
+          },
+        );
+
+        router.replace("/");
+      }
+    } catch (error) {
+      console.log(error);
+
+      setState((values) => ({
+        ...values,
+        errors: {
+          error: "Something went wrong",
+        },
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (event: any) => {
     event.preventDefault();
     setLoading(true);
@@ -46,14 +102,11 @@ const FirebaseLoginForm = () => {
 
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
-      console.log({ res });
+
       if (res?.user) {
-        sessionStorage.setItem("user", "true");
-        window.location.href = "/";
-      } else {
-        console.log(res);
-        setLoading(false);
+        router.replace("/");
       }
+      setLoading(false);
     } catch (error: any) {
       const errorCode = error.code as keyof typeof firebaseAuthErrors;
       if (
@@ -62,45 +115,7 @@ const FirebaseLoginForm = () => {
         firebaseAuthErrors[errorCode] ===
           firebaseAuthErrors["auth/user-not-found"]
       ) {
-        // find user by email in db
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/auth/login`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-          }
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setState((values) => ({
-            ...values,
-            errors: data.errors,
-          }));
-        } else {
-          // need to migrate user to firebase
-          await createUserWithEmailAndPassword(auth, email, password);
-          await updateProfile(auth?.currentUser as any, {
-            displayName: data.user.name,
-          });
-
-          await fetch(
-            `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/migrate-user-data`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ newId: auth?.currentUser?.uid, email }),
-            }
-          );
-
-          router.push("/");
-        }
+        await migrateUser(email, password);
       } else if (error.code in firebaseAuthErrors) {
         setState((values) => ({
           ...values,
@@ -155,20 +170,13 @@ const FirebaseLoginForm = () => {
           <InputErrorLabel errorMsg={state.errors.password} />
         )}
       </div>
-      {loading ? (
-        <button type="button" className="btn btn-secondary">
-          <span className="loading loading-spinner"></span>
-          Logging In
-        </button>
-      ) : (
-        <button className="btn btn-secondary">Login</button>
-      )}
-      {state?.errors?.error && (
-        <div role="alert" className="alert bg-red-100 border border-red-200">
-          <HiOutlineExclamationTriangle className="text-xl" />
-          <span>{state.errors.error}</span>
-        </div>
-      )}
+
+      <FormSubmitBtn isSubmitting={loading}>
+        {loading ? "Logging In..." : "Login"}
+      </FormSubmitBtn>
+
+      {state?.errors?.error && <ErrorAlert message={state.errors.error} />}
+
       <div className="text-center">
         Don&apos;t have an account?{" "}
         <Link className="link" href="/register">

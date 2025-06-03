@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar/navbar";
 import { AuthProvider } from "@/contexts/auth-context";
+import { SocketProvider } from "@/contexts/socket-context";
+import SetupSocketEvents from "@/components/SetupSocketEvents";
+import QueryClientWrapperProvider from "@/components/QueryClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,8 +44,13 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen overflow-hidden flex flex-col`}
       >
         <AuthProvider>
-          <Navbar />
-          <div className="flex-1">{children}</div>
+          <QueryClientWrapperProvider>
+            <SocketProvider>
+              <SetupSocketEvents />
+              <Navbar />
+              <div className="flex-1">{children}</div>
+            </SocketProvider>
+          </QueryClientWrapperProvider>
         </AuthProvider>
       </body>
     </html>

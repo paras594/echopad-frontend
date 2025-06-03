@@ -1,10 +1,41 @@
 "use client";
 
-import { fileTypeIcons } from "@/utils/file-type-icons";
-import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getIdToken } from "firebase/auth";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { PiDownloadSimple, PiTrashSimple } from "react-icons/pi";
+import { useAuth } from "@/contexts/auth-context";
+import { fileTypeIcons } from "@/utils/file-type-icons";
+
+async function deleteFile({
+  fileId,
+  token,
+}: {
+  fileId: string;
+  token: string;
+}) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files/${fileId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to delete user file");
+    }
+  } catch (error) {
+    console.log({ error });
+  }
+}
 
 const FileCard = ({
   id,
@@ -14,12 +45,17 @@ const FileCard = ({
   filesCount,
   createdAt,
   fileUrl,
-  resourceType,
   format,
-  publicId,
-  onDelete,
-  deleting,
 }: any) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: deleteFile,
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+    },
+  });
   const fileCardDropdownRef = useRef<any>(null);
 
   useEffect(() => {
@@ -39,7 +75,12 @@ const FileCard = ({
 
   const handleDeleteClick = async () => {
     fileCardDropdownRef.current.open = false;
-    onDelete();
+    if (!user) return;
+    const token = await getIdToken(user);
+    mutation.mutate({
+      fileId: id,
+      token,
+    });
   };
 
   const handleFileDownload = async () => {
@@ -59,6 +100,7 @@ const FileCard = ({
 
   const FileIcon = fileTypeIcons[format] || fileTypeIcons.default;
 
+  const deleting = mutation.isPending;
   return (
     <div
       className={`flex items-center gap-4 shadow border-t border-gray-100 rounded-lg py-3 px-3 ${

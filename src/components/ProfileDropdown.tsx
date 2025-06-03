@@ -1,22 +1,35 @@
 "use client";
 import React from "react";
 import { getAuth, signOut } from "firebase/auth";
+import { useSocket } from "@/contexts/socket-context";
 
 const ProfileDropdown = ({ name }: any) => {
+  const { socket } = useSocket();
   const auth = getAuth();
 
   const logout = async () => {
     try {
       await signOut(auth);
-      window.location.href = "/";
+      await fetch("/api/set-token", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (socket) {
+        socket.disconnect();
+      }
+
+      window.location.href = "/login";
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <div className="dropdown dropdown-end">
-      <button tabIndex={0} role="button" className="flex gap-2 items-center">
+    <details className="dropdown dropdown-end">
+      <summary tabIndex={0} role="button" className="flex gap-2 items-center">
         <div className="avatar placeholder">
           <div className="bg-primary text-white border-2 border-accent w-9 md:w-10 rounded-full">
             <span className="text-lg md:text-xl capitalize">
@@ -27,7 +40,7 @@ const ProfileDropdown = ({ name }: any) => {
         <span className="prose text-primary hidden md:inline font-semibold">
           {name}
         </span>
-      </button>
+      </summary>
       <div
         tabIndex={0}
         className="mt-3 z-[99] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
@@ -37,7 +50,7 @@ const ProfileDropdown = ({ name }: any) => {
           Logout
         </button>
       </div>
-    </div>
+    </details>
   );
 };
 
