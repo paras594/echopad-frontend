@@ -88,6 +88,8 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
     xhr.setRequestHeader("authorization", `Bearer ${idToken}`);
 
     xhr.send(data);
+    event.target.files = null;
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (

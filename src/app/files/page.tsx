@@ -1,10 +1,21 @@
+"use client";
+
 import Container from "@/components/Container";
 import PageTitle from "./PageTitle";
 import FileUpload from "./FileUpload";
 import FilesContainer from "./FilesContainer";
 import RefetchFilesBtn from "./RefetchFilesBtn";
+import UploadingFiles from "./UploadingFiles";
+import { useEffect, useRef } from "react";
+import autoAnimate from "@formkit/auto-animate";
 
-const Files = async () => {
+const Files = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current && autoAnimate(containerRef.current);
+  }, [containerRef]);
+
   return (
     <div className="mt-4 overflow-y-auto scrollable-content h-[80vh] md:h-screen">
       <Container>
@@ -18,6 +29,10 @@ const Files = async () => {
           </div>
         </div>
 
+        <div className="h-6" />
+        <div ref={containerRef}>
+          <UploadingFiles />
+        </div>
         <FilesContainer />
       </Container>
       <div className="h-40 w-full" />

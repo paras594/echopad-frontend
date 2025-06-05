@@ -5,9 +5,11 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import FilesList from "./FilesList";
 import Wrapper from "./Wrapper";
-import UploadingFiles from "./UploadingFiles";
 import { getIdToken } from "firebase/auth";
 import FilesSkeleton from "./FilesSkeleton";
+import { useEffect, useRef } from "react";
+import autoAnimate from "@formkit/auto-animate";
+import useStore from "@/lib/useStore";
 
 export async function fetchData(token: string) {
   const res = await fetch(
@@ -27,8 +29,15 @@ export async function fetchData(token: string) {
 }
 
 const FilesContainer = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const { user, loading: loadingUser } = useAuth();
-  const { data, isLoading: loadingFiles } = useQuery({
+  const uploadingFiles = useStore((state) => state.uploadingFiles);
+  const {
+    data,
+    isFetching,
+    isRefetching,
+    isLoading: loadingFiles,
+  } = useQuery({
     queryKey: ["files"],
     queryFn: async () => {
       const token = await getIdToken(user!);
@@ -39,29 +48,37 @@ const FilesContainer = () => {
     enabled: !!user,
   });
 
+  useEffect(() => {
+    containerRef.current && autoAnimate(containerRef.current);
+  }, [containerRef]);
+
   if (loadingFiles || loadingUser)
     return (
-      <div>
+      <div ref={containerRef}>
         <FilesSkeleton />
       </div>
     );
 
-  if (data !== null && data.length === 0) {
+  if (
+    data !== null &&
+    data.length === 0 &&
+    !uploadingFiles.uploading &&
+    (!isFetching || !isRefetching)
+  ) {
     return (
-      <div>
+      <Wrapper>
         <div className="relative w-4/5 h-60 md:h-72 mx-auto">
           <Image src="/files-illustration.svg" alt="no files" fill />
         </div>
         <p className="text-center font-semibold text-lg text-gray-400">
           No Files Uploaded
         </p>
-      </div>
+      </Wrapper>
     );
   }
 
   return (
     <Wrapper>
-      <UploadingFiles />
       <FilesList files={data || []} isLoading={loadingFiles || loadingUser} />
     </Wrapper>
   );

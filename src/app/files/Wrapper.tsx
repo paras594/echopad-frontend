@@ -10,7 +10,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   }, [filesListRef]);
 
   return (
-    <div className="mt-6 flex flex-col gap-4" ref={filesListRef}>
+    <div className="flex flex-col gap-4" ref={filesListRef}>
       {children}
     </div>
   );
