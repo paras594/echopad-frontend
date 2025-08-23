@@ -63,3 +63,13 @@
     @apply bg-slate-100 px-4 py-2 rounded-lg my-2;
   }
 }
+
+@layer components {
+  .btn-primary:hover {
+    background: #3C2E66;
+    @apply text-white;
+  }
+  .btn-ghost:hover {
+    @apply bg-gray-100;
+  }
+}

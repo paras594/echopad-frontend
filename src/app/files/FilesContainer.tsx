@@ -1,52 +1,30 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useAuth } from "@/contexts/auth-context";
 import FilesList from "./FilesList";
 import Wrapper from "./Wrapper";
-import { getIdToken } from "firebase/auth";
 import FilesSkeleton from "./FilesSkeleton";
 import { useEffect, useRef } from "react";
 import autoAnimate from "@formkit/auto-animate";
 import useStore from "@/lib/useStore";
 
-export async function fetchData(token: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${token}`,
-      },
-    },
-  );
+type Props = {
+  loadingFiles: boolean;
+  loadingUser: boolean;
+  files: any;
+  isFetching: boolean;
+  isRefetching: boolean;
+};
 
-  const data = await res.json();
-
-  return data;
-}
-
-const FilesContainer = () => {
+const FilesContainer = ({
+  loadingFiles,
+  loadingUser,
+  files = [],
+  isFetching,
+  isRefetching,
+}: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { user, loading: loadingUser } = useAuth();
   const uploadingFiles = useStore((state) => state.uploadingFiles);
-  const {
-    data,
-    isFetching,
-    isRefetching,
-    isLoading: loadingFiles,
-  } = useQuery({
-    queryKey: ["files"],
-    queryFn: async () => {
-      const token = await getIdToken(user!);
-      const data = await fetchData(token);
-
-      return data.userFiles;
-    },
-    enabled: !!user,
-  });
 
   useEffect(() => {
     containerRef.current && autoAnimate(containerRef.current);
@@ -60,8 +38,8 @@ const FilesContainer = () => {
     );
 
   if (
-    data !== null &&
-    data.length === 0 &&
+    files !== null &&
+    files.length === 0 &&
     !uploadingFiles.uploading &&
     (!isFetching || !isRefetching)
   ) {
@@ -79,7 +57,7 @@ const FilesContainer = () => {
 
   return (
     <Wrapper>
-      <FilesList files={data || []} isLoading={loadingFiles || loadingUser} />
+      <FilesList files={files} isLoading={loadingFiles || loadingUser} />
     </Wrapper>
   );
 };

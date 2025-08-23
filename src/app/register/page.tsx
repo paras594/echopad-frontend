@@ -11,7 +11,7 @@ const Register = () => {
         </h1>
         <FirebaseRegisterForm />
       </Container>
-      <Version version="2.1" />
+      <Version version="2.2" />
     </div>
   );
 };
