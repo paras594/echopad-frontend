@@ -26,7 +26,9 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
   }, [fileInputRef]);
 
   const handleUploadNewFileClick = () => {
-    fileInputRef?.current?.click();
+    setTimeout(() => {
+      fileInputRef?.current?.click();
+    }, 100);
   };
 
   const handleFilesSubmit = async (
@@ -34,8 +36,16 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
   ) => {
     if (!user) return;
 
-    const files = Array.prototype.slice.call(event.target.files);
+    const fileList = event.target.files;
 
+    console.log("FileList:", fileList);
+
+    if (!fileList || fileList.length === 0) {
+      console.log("No files selected");
+      return;
+    }
+
+    const files = Array.from(fileList);
     if (!files || files.length === 0) return;
 
     const data = new FormData();
@@ -43,6 +53,12 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
     files.forEach((file) => {
       data.append("files", file);
     });
+
+    // Log FormData contents (for debugging)
+    console.log("FormData entries:");
+    for (const pair of data.entries()) {
+      console.log(pair[0], pair[1]);
+    }
 
     setUploadingFiles({
       uploading: true,
@@ -116,10 +132,10 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
         ref={fileInputRef}
         type="file"
         defaultValue=""
-        key={Date.now()}
         onChange={handleFilesSubmit}
         className="hidden"
         multiple
+        accept="*/*"
       />
       <button
         onClick={handleUploadNewFileClick}
