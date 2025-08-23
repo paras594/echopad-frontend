@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import { getIdToken } from "firebase/auth";
 
-export async function fetchData(token: string) {
+async function fetchData(token: string) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_MAIN_API_V1_URL}/user-files`,
     {
