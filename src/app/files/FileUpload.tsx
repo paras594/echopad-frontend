@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getIdToken } from "firebase/auth";
 import { useAuth } from "@/contexts/auth-context";
@@ -11,6 +11,19 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
   const queryClient = useQueryClient();
   const setUploadingFiles = useStore((state) => state.setUploadingFiles);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Clear input value on mount
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    return () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    };
+  }, [fileInputRef]);
 
   const handleUploadNewFileClick = () => {
     fileInputRef?.current?.click();
@@ -66,6 +79,12 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
     // listen for `abort` event
     xhr.onabort = () => {
       console.error("Download cancelled.");
+      setUploadingFiles({
+        uploading: false,
+        progress: 0,
+        fileName: "",
+        filesCount: 0,
+      });
     };
 
     xhr.upload.addEventListener("progress", (event) => {
@@ -88,7 +107,6 @@ const FileUpload = ({ btnClasses = "" }: { btnClasses?: string }) => {
     xhr.setRequestHeader("authorization", `Bearer ${idToken}`);
 
     xhr.send(data);
-    event.target.files = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
